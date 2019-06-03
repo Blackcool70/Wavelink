@@ -599,9 +599,16 @@ class Music:
 
     async def do_stop(self, ctx):
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=Player)
-
+        # This to properly clear the queue after you [prefix]stop
+        # Plus stop the song. The previous code only disconnected the bot and destroyed_controller.
+        # but the songs kept playing.
+        try:
+            await player.queue._queue.clear()
+        except Exception as e:
+            pass
         await player.destroy_controller()
         await player.disconnect()
+        await player.stop()
 
     @commands.command(name='volume', aliases=['vol'])
     @commands.cooldown(1, 2, commands.BucketType.guild)
